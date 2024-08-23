@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\ShortalkB2.props" />
+</Project>
