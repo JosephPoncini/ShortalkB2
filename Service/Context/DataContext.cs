@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,11 +11,12 @@ namespace ShortalkB2.Service.Context
 
     public class DataContext : DbContext
     {
-        // private readonly ConcurrentDictionary<string, UserConnection> _connections = new();
+        
+        private readonly ConcurrentDictionary<string, UserConnection> _connections = new();
 
-        // public ConcurrentDictionary<string, UserConnection> connections => _connections;
+        public ConcurrentDictionary<string, UserConnection> connections => _connections;
 
-        public DbSet<LobbyRoomModel> LobbyInfo { get; set; }
+        public DbSet<GameModel> GameInfo { get; set; }
         // public DbSet<GameModel> GameInfo {get; set;}
 
 

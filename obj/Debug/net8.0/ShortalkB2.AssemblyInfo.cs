@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ShortalkB2")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9bf909186132d0ffa8cabf2015ef3279a9984787")]
 [assembly: System.Reflection.AssemblyProductAttribute("ShortalkB2")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ShortalkB2")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
