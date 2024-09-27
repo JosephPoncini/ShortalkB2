@@ -59,6 +59,10 @@ public class GameHub : Hub
     
     public async Task RefreshGamePhase(UserConnection conn, string gamePhase)
     {
+        if(gamePhase == "game")
+        {
+            _data.SetStartTimeForRound(conn.RoomName);
+        }
         await Clients.Group(conn.RoomName)
             .SendAsync("RefreshGamePhase", "admin", $"The game has been set the game {gamePhase} mode.");
     }

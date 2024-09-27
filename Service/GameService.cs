@@ -1,4 +1,5 @@
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.VisualBasic;
 using ShortalkB2.Models;
 using ShortalkB2.Models.Dtos;
 using ShortalkB2.Service.Context;
@@ -49,6 +50,40 @@ namespace ShortalkB2.Service
         public GameModel? GetRoomByName(string roomName)
         {
             return _context.GameInfo.FirstOrDefault(game => game.RoomName == roomName);
+        }
+
+        public bool CheckIfGameExists(string roomName)
+        {
+            var game = _context.GameInfo.FirstOrDefault(g => g.RoomName == roomName);
+
+            if (game == null)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public bool CheckIfNameExistsInGame(string roomName, string username)
+        {
+            var game = _context.GameInfo.FirstOrDefault(g => g.RoomName == roomName);
+
+            if (game == null)
+            {
+                return true;
+            }
+
+            bool isInGame = game.PlayerA1 == username ||
+                             game.PlayerA2 == username ||
+                             game.PlayerA3 == username ||
+                             game.PlayerA4 == username ||
+                             game.PlayerA5 == username ||
+                             game.PlayerB1 == username ||
+                             game.PlayerB2 == username ||
+                             game.PlayerB3 == username ||
+                             game.PlayerB4 == username ||
+                             game.PlayerB5 == username;
+
+            return isInGame;
         }
 
         public TeamMembersDto GetTeamMembersByRoom(string roomName)
@@ -109,7 +144,7 @@ namespace ShortalkB2.Service
             return game.NumberOfRounds;
         }
 
-        public string GetHostByRoom(string roomName)
+        public string? GetHostByRoom(string roomName)
         {
             var game = _context.GameInfo.FirstOrDefault(g => g.RoomName == roomName);
 
@@ -121,7 +156,7 @@ namespace ShortalkB2.Service
             return game.Host;
         }
 
-        public string GamePhaseByRoom(string roomName)
+        public string? GamePhaseByRoom(string roomName)
         {
             var game = _context.GameInfo.FirstOrDefault(g => g.RoomName == roomName);
 
@@ -339,7 +374,7 @@ namespace ShortalkB2.Service
                 if (string.IsNullOrEmpty(game.PlayerB1))
                 {
                     game.PlayerB1 = username;
-                    
+
                 }
                 else if (string.IsNullOrEmpty(game.PlayerB2))
                 {
@@ -497,7 +532,7 @@ namespace ShortalkB2.Service
                 return "Room not found";
             }
 
-            string[] players =
+            string?[] players =
             [
                 game.PlayerA1,
                 game.PlayerA2,
@@ -537,13 +572,13 @@ namespace ShortalkB2.Service
                 readyStatuses[j] = temp2;
             }
 
-            string[] playersRandomized = new string[10];
+            string?[] playersRandomized = new string?[10];
             bool[] statusesRandomized = new bool[10];
             int ii = 0;
 
             for (int i = 0; i < players.Length; i++)
             {
-                playersRandomized[i] = "";
+                playersRandomized[i] = null;
                 statusesRandomized[i] = false;
                 if (!string.IsNullOrEmpty(players[i]))
                 {
@@ -766,6 +801,55 @@ namespace ShortalkB2.Service
             {
                 return "Failed to update Game Phase";
             }
+        }
+
+        public DateTime GetTime()
+        {
+            var currentTime = DateTime.UtcNow;
+            return currentTime;
+        }
+
+        public string SetStartTimeForRound(string roomName)
+        {
+            var game = _context.GameInfo.FirstOrDefault(g => g.RoomName == roomName);
+
+            if (game == null)
+            {
+                return "Room not found";
+            }
+
+            DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+            DateTime currentTime = GetTime();
+
+            TimeSpan timeSinceEpoch = currentTime - epoch;
+
+            game.Time = (int)timeSinceEpoch.TotalSeconds;
+
+            _context.Update(game);
+            int saveResult = _context.SaveChanges();
+
+            if (saveResult != 0)
+            {
+                return "Start Time successfully implemented";
+            }
+            else
+            {
+                return "Failed to implement start time";
+            }
+
+        }
+
+        public int? GetStartTime(string roomName)
+        {
+            var game = _context.GameInfo.FirstOrDefault(g => g.RoomName == roomName);
+
+            if (game == null)
+            {
+                return null;
+            }
+
+            return game.Time;
         }
     }
 

@@ -50,6 +50,22 @@ namespace ShortalkB2.Controllers
         }
 
         [HttpGet]
+        [Route("CheckIfRoomExists/{roomName}")]
+        public ActionResult<List<GameModel>> CheckIfGameExists(string roomName)
+        {
+            bool result = _data.CheckIfGameExists(roomName);
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("CheckIfNameExistsInGame/{roomName}/{username}")]
+        public ActionResult<List<GameModel>> CheckIfNameExistsInGame(string roomName, string username)
+        {
+            bool result = _data.CheckIfNameExistsInGame(roomName, username);
+            return Ok(result);
+        }
+
+        [HttpGet]
         [Route("getTeamMembersByRoom/{roomName}")]
         public ActionResult<TeamMembersDto> GetTeamMembersByRoom(string roomName)
         {
@@ -264,6 +280,38 @@ namespace ShortalkB2.Controllers
 
             return Ok($"The Game has been set to {request.GamePhase}.");
         }
+
+        [HttpGet]
+        [Route("getTime")]
+        public IActionResult GetCurrentTime()
+        {
+            var currentTime = _data.GetTime();
+            return Ok(currentTime);
+        }
+
+        [HttpPost]
+        [Route("setStartTimeForRound/{roomName}")]
+        public ActionResult SetStartTimeForRound(string roomName)
+        {
+            var result = _data.SetStartTimeForRound(roomName);
+
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("getStartTimeByRoom/{roomName}")]
+        public ActionResult<int?> GetStartTime(string roomName)
+        {
+            var timeLimit = _data.GetStartTime(roomName);
+
+            if (timeLimit == null)
+            {
+                return NotFound("Room not found.");
+            }
+
+            return Ok(timeLimit);
+        }
+
 
 
     }
