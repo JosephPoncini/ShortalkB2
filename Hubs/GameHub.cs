@@ -66,6 +66,35 @@ public class GameHub : Hub
         await Clients.Group(conn.RoomName)
             .SendAsync("RefreshGamePhase", "admin", $"The game has been set the game {gamePhase} mode.");
     }
+
+    public async Task RefreshCard (UserConnection conn)
+    {
+        string? msg = _data.ChangeCard(conn.RoomName);
+
+        await Clients.Group(conn.RoomName)
+            .SendAsync("RefreshCard", "admin", msg);
+    }
+
+    public async Task GoToNextTurn (UserConnection conn)
+    {
+        string msg = _data.StartNextTurn(conn.RoomName);
+
+        await Clients.Group(conn.RoomName)
+            .SendAsync("GoToNextTurn", "admin", msg);
+    }
     
+    public async Task TypeDescription (UserConnection conn, string msg)
+    {
+        await Clients.Group(conn.RoomName)
+            .SendAsync("TypeDescription", "admin", msg);
+    }
+    
+    public async Task SendGuess(UserConnection conn, string guess)
+    {
+        string color = _data.CheckGuess(conn.RoomName, guess);
+
+        await Clients.Group(conn.RoomName)
+            .SendAsync("SendGuess", conn.Username, guess, color);
+    }
 
 }

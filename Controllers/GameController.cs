@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.ObjectPool;
 using ShortalkB2.Models;
 using ShortalkB2.Models.Dtos;
 using ShortalkB2.Service;
@@ -311,8 +312,80 @@ namespace ShortalkB2.Controllers
 
             return Ok(timeLimit);
         }
+        
+        [HttpGet]
+        [Route("getCard/{roomName}")]
+        public ActionResult<CardDto> GetCard(string roomName)
+        {
+            CardDto card = _data.GetCard(roomName);
 
+            return Ok(card);
+        }
+        
+        [HttpGet]
+        [Route("getTurnNumber/{roomName}")]
+        public ActionResult<int> GetTurnNumber(string roomName)
+        {
+            int? turnNumber = _data.GetTurnNumber(roomName);
 
+            return Ok(turnNumber);
+        }
+        
+        [HttpGet]
+        [Route("getAllWords/{roomName}")]
+        public ActionResult<AllWordsDto> GetAllWords(string roomName)
+        {
+            AllWordsDto words = _data.GetAllWords(roomName);
+
+            return Ok(words);
+        }
+
+        [HttpPost]
+        [Route("addSkippedWord")]
+        public IActionResult AddSkippedWord([FromBody] SubmitCardRequestDto request)
+        {
+            string msg = _data.AddSkippedWord(request);
+            return Ok(msg);
+        }
+
+        [HttpPost]
+        [Route("addBuzzedWord")]
+        public IActionResult AddBuzzedWord([FromBody] SubmitCardRequestDto request)
+        {
+            string msg = _data.AddBuzzedWord(request);
+            return Ok(msg);
+        }
+
+        [HttpPost]
+        [Route("addOnePointWord")]
+        public IActionResult AddOnePointWord([FromBody] SubmitCardRequestDto request)
+        {
+            string msg = _data.AddOnePointWord(request);
+            return Ok(msg);
+        }
+
+        [HttpPost]
+        [Route("addThreePointWord")]
+        public IActionResult AddThreePointWord([FromBody] SubmitCardRequestDto request)
+        {
+            string msg = _data.AddThreePointWord(request);
+            return Ok(msg);
+        }
+
+        [HttpPost]
+        [Route("cleanSlate/{roomName}")]
+        public IActionResult CleanSlate(string roomName)
+        {
+            string msg = _data.CleanSlate(roomName);
+            return Ok(msg);
+        }
+
+        [HttpGet]
+        [Route("getWordsBeenSaid/{roomName}")]
+        public WordsHaveBeenSaidDto GetWordsHaveBeenSaid( string roomName)
+        {
+            return _data.GetWordsHaveBeenSaid(roomName);
+        }
 
     }
 }

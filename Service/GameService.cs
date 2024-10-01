@@ -5,6 +5,10 @@ using ShortalkB2.Models.Dtos;
 using ShortalkB2.Service.Context;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
+using System;
+using System.IO;
+using System.Collections.Generic;
 
 namespace ShortalkB2.Service
 {
@@ -850,6 +854,300 @@ namespace ShortalkB2.Service
             }
 
             return game.Time;
+        }
+
+        public string? ChangeCard(string roomName)
+        {
+            var game = _context.GameInfo.FirstOrDefault(g => g.RoomName == roomName);
+
+            if (game == null)
+            {
+                return "Room not found";
+            }
+
+            string json = File.ReadAllText("words.json");
+            List<CardWithChoices> data = JsonSerializer.Deserialize<List<CardWithChoices>>(json);
+
+            Random random = new Random();
+
+            int index = random.Next(0, data.Count);
+
+            CardWithChoices randomCardChoice = data[index];
+
+            Random random2 = new Random();
+            int indexj = random2.Next(0, randomCardChoice.SecondWords.Count);
+
+            CardDto card = new CardDto();
+
+            int coinFlip = random.Next(0, 2);
+
+            switch (coinFlip)
+            {
+                case 0:
+                    card.FirstWord = randomCardChoice.FirstWord;
+                    card.SecondWord = randomCardChoice.FirstWord + " " + randomCardChoice.SecondWords[indexj];
+                    break;
+                case 1:
+                    card.FirstWord = randomCardChoice.SecondWords[indexj];
+                    card.SecondWord = randomCardChoice.FirstWord + " " + randomCardChoice.SecondWords[indexj];
+                    break;
+            }
+
+            if (card.SecondWord != game.ThreePointWord)
+            {
+                game.OnePointWord = card.FirstWord;
+                game.ThreePointWord = card.SecondWord;
+                game.OnePointWordHasBeenSaid = false;
+                game.ThreePointWordHasBeenSaid = false;
+
+                _context.Update(game);
+                int saveResult = _context.SaveChanges();
+
+                if (saveResult != 0)
+                {
+                    return "New Card Picked!";
+                }
+                else
+                {
+                    return "Failed to pick new card";
+                }
+            }
+
+            return ChangeCard(roomName);
+
+        }
+
+        public CardDto? GetCard(string roomName)
+        {
+            var game = _context.GameInfo.FirstOrDefault(g => g.RoomName == roomName);
+
+            if (game == null)
+            {
+                return null;
+            }
+
+            return new CardDto
+            {
+                FirstWord = game.OnePointWord,
+                SecondWord = game.ThreePointWord
+            };
+
+        }
+
+        public string StartNextTurn(string roomName)
+        {
+            var game = _context.GameInfo.FirstOrDefault(g => g.RoomName == roomName);
+
+            if (game == null)
+            {
+                return "Room not found";
+            }
+
+            game.TurnNumber++;
+
+            _context.Update(game);
+            int saveResult = _context.SaveChanges();
+
+            if (saveResult != 0)
+            {
+                return "The Next turn has begun";
+            }
+            else
+            {
+                return "Failed to go to next turn";
+            }
+        }
+
+        public int? GetTurnNumber(string roomName)
+        {
+            var game = _context.GameInfo.FirstOrDefault(g => g.RoomName == roomName);
+
+            if (game == null)
+            {
+                return null;
+            }
+
+            return game.TurnNumber;
+
+        }
+
+        public string AddSkippedWord(SubmitCardRequestDto request)
+        {
+            var game = _context.GameInfo.FirstOrDefault(g => g.RoomName == request.RoomName);
+
+            if (game == null)
+            {
+                return "could not find room";
+            }
+
+            string card = $"{request.Card.FirstWord}_{request.Card.SecondWord}-";
+            game.SkippedWords += card;
+
+            _context.Update(game);
+            int saveResult = _context.SaveChanges();
+
+            if (saveResult != 0)
+            {
+                return "The card has been added to Skipped Words";
+            }
+            else
+            {
+                return "Failed to add card to Skipped Words";
+            }
+        }
+
+        public string AddBuzzedWord(SubmitCardRequestDto request)
+        {
+            var game = _context.GameInfo.FirstOrDefault(g => g.RoomName == request.RoomName);
+
+            if (game == null)
+            {
+                return "could not find room";
+            }
+
+            string card = $"{request.Card.FirstWord}_{request.Card.SecondWord}-";
+            game.BuzzWords += card;
+
+            _context.Update(game);
+            int saveResult = _context.SaveChanges();
+
+            if (saveResult != 0)
+            {
+                return "The card has been added to Buzzed Words";
+            }
+            else
+            {
+                return "Failed to add card to Buzzed Words";
+            }
+        }
+
+        public string AddOnePointWord(SubmitCardRequestDto request)
+        {
+            var game = _context.GameInfo.FirstOrDefault(g => g.RoomName == request.RoomName);
+
+            if (game == null)
+            {
+                return "could not find room";
+            }
+
+            string card = $"{request.Card.FirstWord}_{request.Card.SecondWord}-";
+            game.OnePointWords += card;
+
+            _context.Update(game);
+            int saveResult = _context.SaveChanges();
+
+            if (saveResult != 0)
+            {
+                return "The card has been added to One Point Words";
+            }
+            else
+            {
+                return "Failed to add card to One Point Words";
+            }
+        }
+
+        public string AddThreePointWord(SubmitCardRequestDto request)
+        {
+            var game = _context.GameInfo.FirstOrDefault(g => g.RoomName == request.RoomName);
+
+            if (game == null)
+            {
+                return "could not find room";
+            }
+
+            string card = $"{request.Card.FirstWord}_{request.Card.SecondWord}-";
+            game.ThreePointWords += card;
+
+            _context.Update(game);
+            int saveResult = _context.SaveChanges();
+
+            if (saveResult != 0)
+            {
+                return "The card has been added to Three Point Words";
+            }
+            else
+            {
+                return "Failed to add card to Three Point Words";
+            }
+        }
+
+        public AllWordsDto GetAllWords(string roomName)
+        {
+            var game = _context.GameInfo.FirstOrDefault(g => g.RoomName == roomName);
+
+            return new AllWordsDto
+            {
+                SkippedWords = game.SkippedWords,
+                OnePointWords = game.OnePointWords,
+                ThreePointWords = game.ThreePointWords,
+                BuzzWords = game.BuzzWords
+            };
+
+        }
+
+        public string CleanSlate(string roomName)
+        {
+            var game = _context.GameInfo.FirstOrDefault(g => g.RoomName == roomName);
+
+            if (game == null)
+            {
+                return "could not find room";
+            }
+
+            game.BuzzWords = "";
+            game.SkippedWords = "";
+            game.OnePointWords = "";
+            game.ThreePointWords = "";
+
+            _context.Update(game);
+            int saveResult = _context.SaveChanges();
+
+            if (saveResult != 0)
+            {
+                return "Slate has been cleaned";
+            }
+            else
+            {
+                return "Failed to clean slate";
+            }
+
+        }
+
+        public string CheckGuess(string roomName, string guess)
+        {
+            var game = _context.GameInfo.FirstOrDefault(g => g.RoomName == roomName);
+
+            if (game == null)
+            {
+                return "dgray";
+            }
+
+            if (guess == game.OnePointWord)
+            {
+                game.OnePointWordHasBeenSaid = true;
+                _context.Update(game);
+                _context.SaveChanges();
+                return "green";
+            }
+
+            if (guess == game.ThreePointWord)
+            {
+                game.ThreePointWordHasBeenSaid = true;
+                _context.Update(game);
+                _context.SaveChanges();
+                return "purple";
+            }
+
+            return "black";
+        }
+
+        public WordsHaveBeenSaidDto GetWordsHaveBeenSaid(string roomName)
+        {
+            var game = _context.GameInfo.FirstOrDefault(g => g.RoomName == roomName);
+            return new WordsHaveBeenSaidDto{
+                OnePointWordHasBeenSaid = game.OnePointWordHasBeenSaid,
+                ThreePointWordHasBeenSaid = game.ThreePointWordHasBeenSaid
+            };
         }
     }
 
