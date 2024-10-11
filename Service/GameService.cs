@@ -1005,6 +1005,15 @@ namespace ShortalkB2.Service
                 return "could not find room";
             }
 
+            if (game.TurnNumber % 2 == 1)
+            {
+                game.TeamAScore -= 1;
+            }
+            else
+            {
+                game.TeamBScore -= 1;
+            }
+
             string card = $"{request.Card.FirstWord}_{request.Card.SecondWord}-";
             game.BuzzWords += card;
 
@@ -1030,6 +1039,15 @@ namespace ShortalkB2.Service
                 return "could not find room";
             }
 
+            if (game.TurnNumber % 2 == 1)
+            {
+                game.TeamAScore += 1;
+            }
+            else
+            {
+                game.TeamBScore += 1;
+            }
+
             string card = $"{request.Card.FirstWord}_{request.Card.SecondWord}-";
             game.OnePointWords += card;
 
@@ -1053,6 +1071,15 @@ namespace ShortalkB2.Service
             if (game == null)
             {
                 return "could not find room";
+            }
+
+            if (game.TurnNumber % 2 == 1)
+            {
+                game.TeamAScore += 3;
+            }
+            else
+            {
+                game.TeamBScore += 3;
             }
 
             string card = $"{request.Card.FirstWord}_{request.Card.SecondWord}-";
@@ -1144,9 +1171,20 @@ namespace ShortalkB2.Service
         public WordsHaveBeenSaidDto GetWordsHaveBeenSaid(string roomName)
         {
             var game = _context.GameInfo.FirstOrDefault(g => g.RoomName == roomName);
-            return new WordsHaveBeenSaidDto{
+            return new WordsHaveBeenSaidDto
+            {
                 OnePointWordHasBeenSaid = game.OnePointWordHasBeenSaid,
                 ThreePointWordHasBeenSaid = game.ThreePointWordHasBeenSaid
+            };
+        }
+
+        public ScoresDto GetScores(string roomName)
+        {
+            var game = _context.GameInfo.FirstOrDefault(g => g.RoomName == roomName);
+            return new ScoresDto
+            {
+                TeamAScore = game.TeamAScore,
+                TeamBScore = game.TeamBScore
             };
         }
     }

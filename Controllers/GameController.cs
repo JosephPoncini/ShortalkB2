@@ -387,5 +387,12 @@ namespace ShortalkB2.Controllers
             return _data.GetWordsHaveBeenSaid(roomName);
         }
 
+        [HttpGet]
+        [Route("getScores/{roomName}")]
+        public ScoresDto GetScores( string roomName)
+        {
+            return _data.GetScores(roomName);
+        }
+
     }
 }

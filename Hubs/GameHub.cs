@@ -67,12 +67,12 @@ public class GameHub : Hub
             .SendAsync("RefreshGamePhase", "admin", $"The game has been set the game {gamePhase} mode.");
     }
 
-    public async Task RefreshCard (UserConnection conn)
+    public async Task RefreshCard (UserConnection conn, string msg)
     {
-        string? msg = _data.ChangeCard(conn.RoomName);
+        _data.ChangeCard(conn.RoomName);
 
         await Clients.Group(conn.RoomName)
-            .SendAsync("RefreshCard", "admin", msg);
+            .SendAsync("RefreshCard", conn.Username, msg);
     }
 
     public async Task GoToNextTurn (UserConnection conn)
