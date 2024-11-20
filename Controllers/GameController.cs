@@ -380,6 +380,22 @@ namespace ShortalkB2.Controllers
             return Ok(msg);
         }
 
+        [HttpPost]
+        [Route("cleanLobby/{roomName}")]
+        public IActionResult CleanLobby(string roomName)
+        {
+            string msg = _data.CleanLobby(roomName);
+            return Ok(msg);
+        }
+
+        [HttpPost]
+        [Route("cleanScore/{roomName}")]
+        public IActionResult CleanScore(string roomName)
+        {
+            string msg = _data.CleanScore(roomName);
+            return Ok(msg);
+        }
+
         [HttpGet]
         [Route("getWordsBeenSaid/{roomName}")]
         public WordsHaveBeenSaidDto GetWordsHaveBeenSaid( string roomName)

@@ -51,6 +51,12 @@ public class GameHub : Hub
             .SendAsync("RefreshTime", "admin", $"The time has been set to {time/60}:{time%60}.");
     }
 
+    public async Task BanPlayer(UserConnection conn, string player)
+    {
+        await Clients.Group(conn.RoomName)
+            .SendAsync("BanPlayer", "admin", player);
+    }
+
     public async Task RefreshRounds(UserConnection conn, int round)
     {
         await Clients.Group(conn.RoomName)

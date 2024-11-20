@@ -893,6 +893,11 @@ namespace ShortalkB2.Service
                     break;
             }
 
+            if (card.SecondWord.Length + card.FirstWord.Length > 19)
+            {
+                return ChangeCard(roomName);
+            }
+
             if (card.SecondWord != game.ThreePointWord)
             {
                 game.OnePointWord = card.FirstWord;
@@ -943,7 +948,33 @@ namespace ShortalkB2.Service
                 return "Room not found";
             }
 
+
+
+            int teamACount = 0;
+            int teamBCount = 0;
+
+            // Count players on Team A
+            if (!string.IsNullOrEmpty(game.PlayerA1)) teamACount++;
+            if (!string.IsNullOrEmpty(game.PlayerA2)) teamACount++;
+            if (!string.IsNullOrEmpty(game.PlayerA3)) teamACount++;
+            if (!string.IsNullOrEmpty(game.PlayerA4)) teamACount++;
+            if (!string.IsNullOrEmpty(game.PlayerA5)) teamACount++;
+
+            // Count players on Team B
+            if (!string.IsNullOrEmpty(game.PlayerB1)) teamBCount++;
+            if (!string.IsNullOrEmpty(game.PlayerB2)) teamBCount++;
+            if (!string.IsNullOrEmpty(game.PlayerB3)) teamBCount++;
+            if (!string.IsNullOrEmpty(game.PlayerB4)) teamBCount++;
+            if (!string.IsNullOrEmpty(game.PlayerB5)) teamBCount++;
+
             game.TurnNumber++;
+
+            if (game.NumberOfRounds * Math.Max(teamACount, teamBCount) * 2 == game.TurnNumber)
+            {
+                game.GamePhase = "lastTurn";
+            }
+
+
 
             _context.Update(game);
             int saveResult = _context.SaveChanges();
@@ -1139,6 +1170,77 @@ namespace ShortalkB2.Service
             }
 
         }
+        public string CleanLobby(string roomName)
+        {
+            var game = _context.GameInfo.FirstOrDefault(g => g.RoomName == roomName);
+
+            if (game == null)
+            {
+                return "could not find room";
+            }
+
+            game.TurnNumber = 0;
+            game.PlayerA1 = null;
+            game.PlayerA2 = null;
+            game.PlayerA3 = null;
+            game.PlayerA4 = null;
+            game.PlayerA5 = null;
+            game.PlayerB1 = null;
+            game.PlayerB2 = null;
+            game.PlayerB3 = null;
+            game.PlayerB4 = null;
+            game.PlayerB5 = null;
+            game.ReadyStatusA1 = false;
+            game.ReadyStatusA2 = false;
+            game.ReadyStatusA3 = false;
+            game.ReadyStatusA4 = false;
+            game.ReadyStatusA5 = false;
+            game.ReadyStatusB1 = false;
+            game.ReadyStatusB2 = false;
+            game.ReadyStatusB3 = false;
+            game.ReadyStatusB4 = false;
+            game.ReadyStatusB5 = false;
+
+            _context.Update(game);
+            int saveResult = _context.SaveChanges();
+
+            if (saveResult != 0)
+            {
+                return "Lobby has been cleaned";
+            }
+            else
+            {
+                return "Failed to clean lobby";
+            }
+
+        }
+
+        public string CleanScore(string roomName)
+        {
+            var game = _context.GameInfo.FirstOrDefault(g => g.RoomName == roomName);
+
+            if (game == null)
+            {
+                return "could not find room";
+            }
+
+            game.TeamAScore = 0;
+            game.TeamBScore = 0;
+
+
+            _context.Update(game);
+            int saveResult = _context.SaveChanges();
+
+            if (saveResult != 0)
+            {
+                return "Score has been cleaned";
+            }
+            else
+            {
+                return "Failed to clean score";
+            }
+
+        }
 
         public string CheckGuess(string roomName, string guess)
         {
@@ -1165,6 +1267,11 @@ namespace ShortalkB2.Service
                 return "purple";
             }
 
+            if (IsGuessClose(game.OnePointWord, game.ThreePointWord, guess))
+            {
+                return "yellow";
+            }
+
             return "black";
         }
 
@@ -1186,6 +1293,93 @@ namespace ShortalkB2.Service
                 TeamAScore = game.TeamAScore,
                 TeamBScore = game.TeamBScore
             };
+        }
+
+        public bool IsGuessClose(string? onePointWord, string? threePointWord, string guess)
+        {
+            bool result = AreStringsOffByOneChar(RemoveSpacesAndLowercase(onePointWord), RemoveSpacesAndLowercase(guess)) || AreStringsOffByOneChar(RemoveSpacesAndLowercase(threePointWord), RemoveSpacesAndLowercase(guess));
+
+            return result;
+        }
+
+        public static string RemoveSpacesAndLowercase(string? input)
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return input;
+            }
+
+            // Remove all spaces and convert to lowercase
+            return new string(input.Where(c => !char.IsWhiteSpace(c)).ToArray()).ToLower();
+        }
+
+        public bool AreStringsOffByOneChar(string str1, string str2)
+        {
+            if (str1 == null || str2 == null)
+            {
+                throw new ArgumentNullException("Input strings cannot be null");
+            }
+
+            // If lengths differ by more than 1, they cannot be off by just one char
+            if (Math.Abs(str1.Length - str2.Length) > 1)
+            {
+                return false;
+            }
+
+            // If the lengths are the same, check for one differing character
+            if (str1.Length == str2.Length)
+            {
+                int mismatchCount = 0;
+
+                for (int i = 0; i < str1.Length; i++)
+                {
+                    if (str1[i] != str2[i])
+                    {
+                        mismatchCount++;
+                        if (mismatchCount > 1)
+                        {
+                            return false;
+                        }
+                    }
+                }
+
+                return mismatchCount == 1;
+            }
+
+            // If lengths differ by exactly 1, check for insert/remove case
+            if (str1.Length > str2.Length)
+            {
+                return IsOneEditDistance(str2, str1);
+            }
+            else
+            {
+                return IsOneEditDistance(str1, str2);
+            }
+        }
+
+        private static bool IsOneEditDistance(string shorter, string longer)
+        {
+            int i = 0, j = 0;
+
+            while (i < shorter.Length && j < longer.Length)
+            {
+                if (shorter[i] != longer[j])
+                {
+                    // If there is a mismatch, move the pointer of the longer string
+                    if (i != j)
+                    {
+                        return false;
+                    }
+                    j++;
+                }
+                else
+                {
+                    i++;
+                    j++;
+                }
+            }
+
+            return true;
         }
     }
 
