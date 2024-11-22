@@ -18,6 +18,13 @@ namespace ShortalkB2.Controllers
             _data = data;
         }
 
+        // [HttpGet]
+        // [Route("")]
+        // public string Test()
+        // {
+        //     return "Welcome to Shortalk V2";
+        // }
+
         // Endpoint to create a new lobby room
         [HttpPost]
         [Route("createGame")]

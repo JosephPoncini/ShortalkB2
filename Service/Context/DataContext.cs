@@ -17,12 +17,10 @@ namespace ShortalkB2.Service.Context
         public ConcurrentDictionary<string, UserConnection> connections => _connections;
 
         public DbSet<GameModel> GameInfo { get; set; }
-        // public DbSet<GameModel> GameInfo {get; set;}
 
 
         public DataContext(DbContextOptions options) : base(options) { }
 
-        //this function will build out our table in the database
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
