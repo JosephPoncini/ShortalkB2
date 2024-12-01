@@ -1251,7 +1251,7 @@ namespace ShortalkB2.Service
                 return "dgray";
             }
 
-            if (guess == game.OnePointWord)
+            if (guess.ToLower() == game.OnePointWord)
             {
                 game.OnePointWordHasBeenSaid = true;
                 _context.Update(game);
@@ -1259,7 +1259,7 @@ namespace ShortalkB2.Service
                 return "green";
             }
 
-            if (guess == game.ThreePointWord)
+            if (guess.ToLower() == game.ThreePointWord)
             {
                 game.ThreePointWordHasBeenSaid = true;
                 _context.Update(game);
